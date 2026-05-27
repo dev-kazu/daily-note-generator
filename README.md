@@ -24,6 +24,12 @@ Append a note without the prompt:
 python -m daily_note --note "Reviewed the release checklist"
 ```
 
+Preview a note without writing to the workbook:
+
+```bash
+python -m daily_note --note "Reviewed the release checklist" --dry-run
+```
+
 Use a different workbook or timezone:
 
 ```bash

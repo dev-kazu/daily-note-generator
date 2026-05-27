@@ -54,6 +54,18 @@ def append_note(
     return entry
 
 
+def validate_append_target(workbook_path: Path) -> None:
+    path = Path(workbook_path)
+    if not path.exists():
+        return
+
+    workbook = _load_or_create_workbook(path)
+    if SHEET_NAME not in workbook.sheetnames:
+        return
+
+    _ensure_header(workbook[SHEET_NAME])
+
+
 def _validate_note(note: str) -> None:
     if not note.strip():
         raise ValueError("note must not be empty")

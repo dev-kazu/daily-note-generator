@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-from .workbook import append_note
+from .workbook import append_note, build_entry, validate_append_target
 
 
 DEFAULT_FILE = Path("daily_notes.xlsx")
@@ -32,6 +32,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--note",
         help="Note text. If omitted, you will be prompted for one line of text.",
     )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would be appended without writing the workbook.",
+    )
     return parser
 
 
@@ -55,7 +60,16 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     try:
-        entry = append_note(args.file, note, timezone)
+        if args.dry_run:
+            entry = build_entry(note, timezone)
+            validate_append_target(args.file)
+            print(
+                f"Dry run: would add note to {args.file} "
+                f"at {entry.date} {entry.time}."
+            )
+        else:
+            entry = append_note(args.file, note, timezone)
+            print(f"Added note to {args.file} at {entry.date} {entry.time}.")
     except OSError as error:
         print(f"Error: failed to write workbook: {error}", file=sys.stderr)
         return 1
@@ -63,5 +77,4 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Error: {error}", file=sys.stderr)
         return 1
 
-    print(f"Added note to {args.file} at {entry.date} {entry.time}.")
     return 0
